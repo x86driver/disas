@@ -1,0 +1,5 @@
+Disassembler for doremi cpu
+
+TODO:
+	1. 注意 big-endian or little-endian
+	2. decode type 應該要能動態決定
