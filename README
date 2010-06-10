@@ -2,4 +2,6 @@ Disassembler for doremi cpu
 
 TODO:
 	1. 注意 big-endian or little-endian
-	2. decode type 應該要能動態決定
+	2. decode type 應該要能動態決定 (已完成)
+	3. 是否需要檢查暫存器介於 r0~r15 之間
+

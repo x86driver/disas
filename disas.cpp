@@ -8,7 +8,7 @@
 using namespace std;
 
 struct INSTR instr[] = {
-        {"add", 0},
+        {"add", 0},	// opcode: 0
         {"sub", 0},
         {"ldr", 1},
         {"str", 1},
@@ -23,24 +23,15 @@ void init_table()
 	}
 }
 
-static inline INSTR &find_inst(unsigned char opc)
-{
-	map<unsigned char, INSTR>::iterator it = opcode.find(opc);
-	if (it != opcode.end())
-		return it->second;
-	else
-		return NULL;
-}
-
 /* For add,sub */
 void parse0(unsigned char opc, unsigned char regdst,
 	unsigned char regsrc1, unsigned char regsrc2)
 {
 	cout << "\t";
 
-	INSTR *inst = find_inst(opc);
-	if (inst != NULL) {
-		cout << inst->opc << "\t";
+	map<unsigned char, INSTR>::iterator it = opcode.find(opc);
+	if (it != opcode.end()) {
+		cout << (it->second).opc << "\t";
 	} else {
 		cout << "undefined instruction" << endl;
 		return;
@@ -52,15 +43,26 @@ void parse0(unsigned char opc, unsigned char regdst,
 
 /* For ldr, str */
 void parse1(unsigned char opc, unsigned char regdst,
-        unsigned char addrH, unsigned char addrL)
+        unsigned char addrL, unsigned char addrH)	/* little endian */
 {
 	cout << "\t";
 
+	map<unsigned char, INSTR>::iterator it = opcode.find(opc);
+	if (it != opcode.end()) {
+		cout << (it->second).opc << "\t";
+	} else {
+		cout << "undefined instruction" << endl;
+		return;
+	}
+
+	unsigned short addr = (addrH << 8) | addrL;
+	cout << "r" << static_cast<int>(regdst) << ", 0x" << hex << addr << endl;
 }
 
 typedef void (*parse_func)(unsigned char, unsigned char, unsigned char, unsigned char);
 parse_func parse[] = {
 	parse0,
+	parse1,
 };
 
 int main(int argc, char **argv)
@@ -89,9 +91,10 @@ int main(int argc, char **argv)
 	init_table();
 
 	for (int i = 0; i < file_size; i+=4) {
-		map<unsigned char, INSTR>::iterator it = opcode.begin();
-		if (it != opcode.end())
+		map<unsigned char, INSTR>::iterator it = opcode.find(buf[i]);
+		if (it != opcode.end()) {
 			parse[(it->second).decode_type](buf[i], buf[i+1], buf[i+2], buf[i+3]);
+		}
 	}
 	return 0;
 }
