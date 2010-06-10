@@ -3,20 +3,18 @@
 #include <map>
 #include <string>
 #include <iostream>
+#include "opcode.h"
+
 using namespace std;
 
-struct INSTR {
-	string opc;
-	int decode_type;
+struct INSTR instr[] = {
+        {"add", 0},
+        {"sub", 0},
+        {"ldr", 1},
+        {"str", 1},
 };
 
 map<unsigned char, INSTR> opcode;
-struct INSTR instr[] = {
-	{"add", 0},
-	{"sub", 0},
-	{"ldr", 1},
-	{"str", 1},
-};
 
 void init_table()
 {
