@@ -23,22 +23,45 @@ void init_table()
 	}
 }
 
+static inline INSTR &find_inst(unsigned char opc)
+{
+	map<unsigned char, INSTR>::iterator it = opcode.find(opc);
+	if (it != opcode.end())
+		return it->second;
+	else
+		return NULL;
+}
+
+/* For add,sub */
 void parse0(unsigned char opc, unsigned char regdst,
 	unsigned char regsrc1, unsigned char regsrc2)
 {
 	cout << "\t";
 
-	map<unsigned char, INSTR>::iterator it = opcode.find(opc);
-	if (it != opcode.end()) {
-		cout << (it->second).opc << "\t";
+	INSTR *inst = find_inst(opc);
+	if (inst != NULL) {
+		cout << inst->opc << "\t";
 	} else {
-		cout << "unknown opcode" << endl;
+		cout << "undefined instruction" << endl;
 		return;
 	}
 
 	cout << "r" << static_cast<int>(regdst) << ", r" <<
 		static_cast<int>(regsrc1) << ", r" << static_cast<int>(regsrc2) << endl;
 }
+
+/* For ldr, str */
+void parse1(unsigned char opc, unsigned char regdst,
+        unsigned char addrH, unsigned char addrL)
+{
+	cout << "\t";
+
+}
+
+typedef void (*parse_func)(unsigned char, unsigned char, unsigned char, unsigned char);
+parse_func parse[] = {
+	parse0,
+};
 
 int main(int argc, char **argv)
 {
@@ -66,7 +89,9 @@ int main(int argc, char **argv)
 	init_table();
 
 	for (int i = 0; i < file_size; i+=4) {
-		parse0(buf[i], buf[i+1], buf[i+2], buf[i+3]);
+		map<unsigned char, INSTR>::iterator it = opcode.begin();
+		if (it != opcode.end())
+			parse[(it->second).decode_type](buf[i], buf[i+1], buf[i+2], buf[i+3]);
 	}
 	return 0;
 }
